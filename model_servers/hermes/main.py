@@ -18,7 +18,7 @@ HERMES_API_KEY = os.getenv("HERMES_API_KEY")
 HERMES_BASE_URL = os.getenv("HERMES_BASE_URL_MODEL", "https://inference-api.nousresearch.com/v1")
 HERMES_MODEL = os.getenv("HERMES_MODEL", "Hermes-4.3-36B")
 
-client = OpenAI(api_key=HERMES_API_KEY, base_url=HERMES_BASE_URL)
+client = OpenAI(api_key=HERMES_API_KEY or "stub", base_url=HERMES_BASE_URL)
 
 
 # ── Schemas (inline so this server is standalone) ────────────────────────────
@@ -157,28 +157,105 @@ def extract_json(text: str) -> dict:
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────
 
+STUB_REPORT = {
+    "headline": "State health data privacy laws are spreading — your app may need new consent flows within 12 months",
+    "executive_summary": (
+        "Multiple states are passing health data privacy laws modeled on Washington's My Health My Data Act. "
+        "With a 72% chance of new compliance requirements in your operating states within 12 months, "
+        "you should start auditing data flows now to avoid a last-minute scramble."
+    ),
+    "sections": [
+        {
+            "title": "State Health Data Privacy Laws Are Spreading",
+            "whats_happening": (
+                "Washington's My Health My Data Act created a replicable template that 4+ states have already copied. "
+                "These laws cover health data your app collects even when HIPAA doesn't apply — "
+                "like symptom logs or wellness data outside a provider relationship."
+            ),
+            "why_it_matters": (
+                "Your clinical decision support tool processes patient symptoms and health history. "
+                "Operating in CA, NY, TX, and FL means you could face overlapping requirements with slightly different rules."
+            ),
+            "what_to_do": (
+                "1. Audit your data flows to identify health data not covered by HIPAA (2–3 days). "
+                "2. Update your privacy policy to disclose health data practices (1 day). "
+                "3. Build consent mechanisms adaptable to different state requirements (1–2 weeks)."
+            ),
+        },
+        {
+            "title": "AI in Healthcare Is Getting Regulated",
+            "whats_happening": (
+                "The FDA is tightening oversight of AI/ML-based clinical decision support tools, "
+                "and California has introduced bills requiring transparency in algorithmic healthcare decisions."
+            ),
+            "why_it_matters": (
+                "Your product uses AI for clinical recommendations. Depending on how outputs are used by providers, "
+                "you may be reclassified as a regulated medical device."
+            ),
+            "what_to_do": (
+                "1. Review FDA's updated Software as a Medical Device (SaMD) guidance against your product (1 week). "
+                "2. Document model inputs, outputs, and intended use for regulatory readiness. "
+                "3. Consult a regulatory attorney if your tool influences clinical decisions directly."
+            ),
+        },
+    ],
+    "priority_actions": [
+        {
+            "priority": "high",
+            "action": "Audit health data flows outside HIPAA scope",
+            "deadline": "Within 30 days",
+            "effort": "2–3 days internal",
+        },
+        {
+            "priority": "high",
+            "action": "Review FDA SaMD guidance for AI/ML clinical tools",
+            "deadline": "Within 45 days",
+            "effort": "1 week with legal review",
+        },
+        {
+            "priority": "medium",
+            "action": "Update privacy policy to cover non-HIPAA health data",
+            "deadline": "Q3 2026",
+            "effort": "1 day",
+        },
+        {
+            "priority": "medium",
+            "action": "Design adaptable consent mechanism for multi-state compliance",
+            "deadline": "Q3 2026",
+            "effort": "1–2 weeks engineering",
+        },
+    ],
+    "predictions_used": ["State Health Data Privacy", "AI in Healthcare Regulation"],
+}
+
+
 @app.post("/report", response_model=ReportResponse)
 async def report(req: ReportRequest):
-    try:
-        response = client.chat.completions.create(
-            model=HERMES_MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": build_user_prompt(req)},
-            ],
-            temperature=0.7,
-            max_tokens=3000,
-            stream=False,
-        )
-        raw_text = response.choices[0].message.content
-        data = extract_json(raw_text)
-    except json.JSONDecodeError as e:
-        raise HTTPException(status_code=502, detail=f"Failed to parse Hermes response as JSON: {e}")
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Hermes API error: {e}")
+    # --- Hermes API call commented out (no API key) ---
+    # try:
+    #     response = client.chat.completions.create(
+    #         model=HERMES_MODEL,
+    #         messages=[
+    #             {"role": "system", "content": SYSTEM_PROMPT},
+    #             {"role": "user", "content": build_user_prompt(req)},
+    #         ],
+    #         temperature=0.7,
+    #         max_tokens=3000,
+    #         stream=False,
+    #     )
+    #     raw_text = response.choices[0].message.content
+    #     data = extract_json(raw_text)
+    # except json.JSONDecodeError as e:
+    #     raise HTTPException(status_code=502, detail=f"Failed to parse Hermes response as JSON: {e}")
+    # except Exception as e:
+    #     raise HTTPException(status_code=502, detail=f"Hermes API error: {e}")
+    # data["sections"] = [ReportSection(**s) for s in data.get("sections", [])]
+    # data["priority_actions"] = [PriorityAction(**a) for a in data.get("priority_actions", [])]
+    # return ReportResponse(**data)
 
-    data["sections"] = [ReportSection(**s) for s in data.get("sections", [])]
-    data["priority_actions"] = [PriorityAction(**a) for a in data.get("priority_actions", [])]
+    data = dict(STUB_REPORT)
+    data["sections"] = [ReportSection(**s) for s in data["sections"]]
+    data["priority_actions"] = [PriorityAction(**a) for a in data["priority_actions"]]
     return ReportResponse(**data)
 
 

@@ -18,7 +18,7 @@ K2_API_KEY = os.getenv("K2_API_KEY")
 K2_BASE_URL = os.getenv("K2_BASE_URL", "https://api.k2think.ai/v1")
 K2_MODEL = os.getenv("K2_MODEL", "MBZUAI-IFM/K2-Think-v2")
 
-client = OpenAI(api_key=K2_API_KEY, base_url=K2_BASE_URL)
+client = OpenAI(api_key=K2_API_KEY or "stub", base_url=K2_BASE_URL)
 
 
 # ── Schemas (inline so this server is standalone) ────────────────────────────
@@ -107,32 +107,42 @@ JURISDICTION: {req.jurisdiction}
 
 REGULATORY SIGNALS:{signals_text}
 
-Return ONLY a JSON object with this exact structure:
+Return ONLY a JSON object with this exact structure (replace example values with real ones):
 {{
   "topic": "{req.topic}",
   "jurisdiction": "{req.jurisdiction}",
-  "probability_6mo": <float 0.0-1.0>,
-  "probability_12mo": <float 0.0-1.0>,
-  "probability_24mo": <float 0.0-1.0>,
-  "confidence": "<low|medium|high>",
-  "likely_requirements": ["<requirement>"],
-  "reasoning": "<detailed chain of thought>",
+  "probability_6mo": 0.45,
+  "probability_12mo": 0.65,
+  "probability_24mo": 0.80,
+  "confidence": "medium",
+  "likely_requirements": ["example requirement 1", "example requirement 2"],
+  "reasoning": "detailed chain of thought explaining the prediction",
   "key_signals": [
-    {{"signal_id": "<signal title>", "weight": <float 0.0-1.0>, "rationale": "<why this signal matters>"}}
+    {{"signal_id": "example signal title", "weight": 0.85, "rationale": "why this signal matters"}}
   ],
-  "counterfactors": ["<factor that could delay or prevent regulation>"],
-  "recommended_preparation": ["<concrete action to take now>"]
+  "counterfactors": ["factor that could delay or prevent regulation"],
+  "recommended_preparation": ["concrete action to take now"]
 }}"""
 
 
 def extract_json(text: str) -> dict:
+    # Strip <think>...</think> / <thinking>...</thinking> reasoning blocks
+    text = re.sub(r"<think(?:ing)?>[\s\S]*?</think(?:ing)?>", "", text).strip()
     # Strip markdown code fences if present
     text = re.sub(r"^```(?:json)?\s*", "", text.strip())
     text = re.sub(r"\s*```$", "", text.strip())
-    match = re.search(r"\{[\s\S]*\}", text)
-    if match:
-        return json.loads(match.group())
-    raise ValueError(f"No JSON object found in response: {text[:300]}")
+    # Use raw_decode to parse the first complete JSON object and ignore trailing text
+    start = text.find("{")
+    if start == -1:
+        raise ValueError(f"No JSON object found in response: {text[:300]}")
+    try:
+        obj, _ = json.JSONDecoder().raw_decode(text, start)
+        return obj
+    except json.JSONDecodeError as e:
+        snippet = text[max(0, e.pos - 80): e.pos + 80]
+        raise json.JSONDecodeError(
+            f"{e.msg} | context: ...{snippet!r}...", e.doc, e.pos
+        )
 
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────
