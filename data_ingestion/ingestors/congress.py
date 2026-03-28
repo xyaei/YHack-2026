@@ -3,6 +3,7 @@ from datetime import datetime, timezone, timedelta
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+import time
 
 load_dotenv()
 
@@ -13,7 +14,7 @@ BASE_URL = "https://api.congress.gov/v3/bill"
 API_KEY = os.getenv("CONGRESS_API_KEY")
 
 TOPIC_KEYWORDS = {
-    "privacy":         ["privacy", "personal data", "consumer data", "CCPA", "data protection"],
+    "privacy":         ["privacy", "personal data", "consumer data", "data protection"],
     "health_data":     ["health data", "PHI", "HIPAA", "patient", "medical records", "health information"],
     "ai_ml":           ["artificial intelligence", "machine learning", "algorithm", "automated decision", "AI"],
     "ftc_enforcement": ["FTC", "Federal Trade Commission", "consumer protection", "unfair"],
@@ -35,6 +36,27 @@ def is_relevant(title, summary):
         "patient", "medical", "telehealth", "data", "ftc", "consumer protection"
     ]
     return any(kw in text for kw in keywords)
+
+def get_bill_summary(congress, bill_type, bill_number):
+    """Fetch real CRS summary for a bill."""
+    try:
+        url = f"{BASE_URL}/{congress}/{bill_type.lower()}/{bill_number}/summaries"
+        r = requests.get(url, params={"api_key": API_KEY, "format": "json"}, timeout=10)
+        if r.status_code != 200:
+            return ""
+        summaries = r.json().get("summaries", [])
+        if not summaries:
+            return ""
+        # get the most recent summary
+        latest = sorted(summaries, key=lambda x: x.get("actionDate", ""), reverse=True)[0]
+        text = latest.get("text", "")
+        # strip HTML tags
+        import re
+        text = re.sub(r'<[^>]+>', ' ', text)
+        text = ' '.join(text.split())
+        return text[:1000]
+    except Exception:
+        return ""
 
 def fetch_congress(days_back=30):
     from_date = (datetime.now(timezone.utc) - timedelta(days=days_back)).strftime("%Y-%m-%dT00:00:00Z")
@@ -71,18 +93,24 @@ def fetch_congress(days_back=30):
 
             for bill in bills:
                 title = bill.get("title") or ""
-                summary = ""
-                url = bill.get("url", "")
+                latest_action = bill.get("latestAction", {})
+                last_action_text = latest_action.get("text", "")
 
-                if not is_relevant(title, summary):
+                if not is_relevant(title, last_action_text):
                     continue
 
                 bill_type = bill.get("type", "")
                 bill_number = bill.get("number", "")
                 congress = bill.get("congress", "")
-                external_id = f"{congress}-{bill_type}-{bill_number}"
+                origin_chamber = bill.get("originChamber", "")
+                source_url = f"https://www.congress.gov/bill/{congress}th-congress/{bill_type.lower()}-bill/{bill_number}"
 
-                latest_action = bill.get("latestAction", {})
+                # fetch real CRS summary
+                summary = get_bill_summary(congress, bill_type, bill_number)
+                if not summary:
+                    summary = last_action_text
+                time.sleep(0.3)  # rate limit
+
                 action_date_str = latest_action.get("actionDate", "")
                 try:
                     pub_date = datetime.strptime(action_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -93,20 +121,17 @@ def fetch_congress(days_back=30):
                 recency_score = max(0, 1 - (days_old / 90))
                 signal_score = round((0.75 * 0.6) + (recency_score * 0.4), 3)
 
-                origin_chamber = bill.get("originChamber", "")
-                source_url = f"https://www.congress.gov/bill/{congress}th-congress/{bill_type.lower()}-bill/{bill_number}"
-
                 signal = {
                     "signal_type": "congress",
                     "title": title,
-                    "summary": latest_action.get("text", ""),
+                    "summary": summary,
                     "source_url": source_url,
                     "jurisdiction": "federal",
                     "agency": f"Congress - {origin_chamber}",
                     "topics": classify_topics(title, summary),
                     "signal_score": signal_score,
                     "document_type": f"Bill ({bill_type})",
-                    "document_number": external_id,
+                    "document_number": f"{congress}-{bill_type}-{bill_number}",
                     "published_date": pub_date,
                     "created_at": datetime.now(timezone.utc),
                     "processed_at": None,
@@ -131,7 +156,7 @@ def fetch_congress(days_back=30):
 
             total = data.get("pagination", {}).get("count", 0)
             offset += len(bills)
-            print(f"  {offset} bills processed so far ({inserted} relevant)")
+            print(f"  {offset}/{total} processed ({inserted} relevant so far)")
             if offset >= total or offset >= 1000:
                 break
 
