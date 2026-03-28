@@ -56,6 +56,7 @@ async def analyze(req: AnalyzeRequest):
     report = await get_report(ReportRequest(
         company=req.company,
         prediction_ids=[prediction.topic],
+        predictions=[prediction.model_dump()],
     ))
 
     return AnalyzeResponse(

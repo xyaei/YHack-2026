@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from schemas.company import CompanyProfile
 
 
@@ -20,6 +20,7 @@ class PriorityAction(BaseModel):
 class ReportRequest(BaseModel):
     company: CompanyProfile
     prediction_ids: List[str] = []
+    predictions: Optional[List[dict]] = []  # full prediction objects forwarded to Hermes
 
 
 class ReportResponse(BaseModel):
