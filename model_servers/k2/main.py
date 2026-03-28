@@ -125,24 +125,29 @@ Return ONLY a JSON object with this exact structure (replace example values with
 }}"""
 
 
+REQUIRED_FIELDS = {"topic", "jurisdiction", "probability_6mo", "probability_12mo", "confidence"}
+
 def extract_json(text: str) -> dict:
     # Strip <think>...</think> / <thinking>...</thinking> reasoning blocks
     text = re.sub(r"<think(?:ing)?>[\s\S]*?</think(?:ing)?>", "", text).strip()
     # Strip markdown code fences if present
     text = re.sub(r"^```(?:json)?\s*", "", text.strip())
     text = re.sub(r"\s*```$", "", text.strip())
-    # Use raw_decode to parse the first complete JSON object and ignore trailing text
-    start = text.find("{")
-    if start == -1:
-        raise ValueError(f"No JSON object found in response: {text[:300]}")
-    try:
-        obj, _ = json.JSONDecoder().raw_decode(text, start)
-        return obj
-    except json.JSONDecodeError as e:
-        snippet = text[max(0, e.pos - 80): e.pos + 80]
-        raise json.JSONDecodeError(
-            f"{e.msg} | context: ...{snippet!r}...", e.doc, e.pos
-        )
+    # Try each '{' position and return the first object containing all required fields
+    decoder = json.JSONDecoder()
+    pos = 0
+    while True:
+        start = text.find("{", pos)
+        if start == -1:
+            break
+        try:
+            obj, _ = decoder.raw_decode(text, start)
+            if isinstance(obj, dict) and REQUIRED_FIELDS.issubset(obj.keys()):
+                return obj
+        except json.JSONDecodeError:
+            pass
+        pos = start + 1
+    raise ValueError(f"No valid PredictionResponse JSON found in response: {text[:300]}")
 
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────
