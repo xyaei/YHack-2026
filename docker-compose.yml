@@ -1,0 +1,27 @@
+services:
+  k2:
+    build: ./model_servers/k2
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./model_servers/k2/.env
+
+  hermes:
+    build: ./model_servers/hermes
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./model_servers/hermes/.env
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - K2_BASE_URL=http://k2:8001
+      - HERMES_BASE_URL=http://hermes:8002
+    depends_on:
+      - k2
+      - hermes
