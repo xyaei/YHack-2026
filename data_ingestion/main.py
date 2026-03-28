@@ -16,6 +16,7 @@ from ingestors.federal_agencies import fetch_federal_agencies
 from ingestors.reddit import fetch_reddit
 from ingestors.google_alerts import fetch_google_news
 from pipeline.velocity import compute_velocity
+from pipeline.embeddings import embed_signals
 
 db = MongoClient(os.getenv("MONGODB_URI"))["foreseen"]
 
@@ -51,8 +52,11 @@ def run_pipeline(days_back=28):
     print("\n[8/9] Google News")
     fetch_google_news()
 
-    print("\n[9/9] Signal Velocity")
+    print("\n[9/10] Signal Velocity")
     compute_velocity()
+
+    print("\n[10/10] Embeddings")
+    embed_signals()
 
     end = datetime.now(timezone.utc)
     elapsed = round((end - start).total_seconds(), 1)

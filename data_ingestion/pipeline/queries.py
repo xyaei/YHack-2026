@@ -194,6 +194,45 @@ def get_pipeline_stats():
     }
 
 
+# ── Semantic search ───────────────────────────────────────────────────────────
+
+def semantic_search(query: str, limit: int = 20, min_score: float = 0.4):
+    """
+    Vector similarity search over signal embeddings.
+    Requires the Atlas vector search index 'signal_embedding_index'.
+    query: free-form text (stop words removed + embedded internally)
+    """
+    from pipeline.embeddings import embed_text
+    query_vec = embed_text(query)
+
+    results = db["signals"].aggregate([
+        {
+            "$vectorSearch": {
+                "index": "signal_embedding_index",
+                "path": "embedding",
+                "queryVector": query_vec,
+                "numCandidates": limit * 10,
+                "limit": limit,
+            }
+        },
+        {
+            "$addFields": {"semantic_score": {"$meta": "vectorSearchScore"}}
+        },
+        {
+            "$match": {"semantic_score": {"$gte": min_score}}
+        },
+        {
+            "$project": {
+                "_id": 0, "title": 1, "summary": 1, "source_url": 1,
+                "signal_type": 1, "jurisdiction": 1, "agency": 1,
+                "signal_score": 1, "published_date": 1, "topics": 1,
+                "semantic_score": 1,
+            }
+        },
+    ])
+    return list(results)
+
+
 # ── Quick test ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
