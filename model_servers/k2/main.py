@@ -94,12 +94,22 @@ def build_user_prompt(req: PredictionRequest) -> str:
 
 COMPANY
 Name: {c.name}
+Legal structure: {c.legal_structure}
 Industry: {c.industry}
+Size: {c.size} employees
+Revenue range: {c.revenue_range or 'Unknown'}
+Funding stage: {c.funding_stage or 'Unknown'}
 Location: {c.location}
 Operating states: {', '.join(c.operating_states) or 'N/A'}
+Operating countries: {', '.join(c.operating_countries) or 'US'}
+Sells to: {'Businesses (B2B)' if c.b2b else 'Consumers (B2C)'}
+Customer count: {c.customer_count or 'Unknown'}
 Handles PHI: {c.handles_phi} | PII: {c.handles_pii} | Financial data: {c.handles_financial_data}
 Uses AI/ML: {c.uses_ai_ml}
 Certifications: {', '.join(c.certifications) or 'None'}
+Has legal counsel: {c.has_legal_counsel}
+Has compliance team: {c.has_compliance_team}
+Public company: {c.is_public}
 Description: {c.description}
 
 TOPIC: {req.topic}
