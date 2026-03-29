@@ -28,22 +28,18 @@ function MockSourcesCaption() {
   return (
     <p className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs leading-relaxed text-neutral-500">
       <span className="inline-flex items-center gap-1">
-        <span aria-hidden className="text-neutral-400">
-        </span>
+        <img src="/logo-mongodb.png" alt="" width={14} height={14} className={icon} draggable={false} />
+        MongoDB
       </span>
+      <span className="text-neutral-400">/</span>
       <span className="inline-flex items-center gap-1">
-        <img src="/logo-hex.png" alt="" width={14} height={14} className={icon} draggable={false} />
-        Hex
+        <img src="/k2v2-2.png" alt="" width={14} height={14} className={icon} draggable={false} />
+        K2 Think v2
       </span>
       <span className="text-neutral-400">/</span>
       <span className="inline-flex items-center gap-1">
         <img src="/logo-hermes.png" alt="" width={14} height={14} className={cn(icon, 'rounded-sm')} draggable={false} />
         Hermes
-      </span>
-      <span className="text-neutral-400">/</span>
-      <span className="inline-flex items-center gap-1">
-        <img src="/logo-mongodb.png" alt="" width={14} height={14} className={icon} draggable={false} />
-        MongoDB
       </span>
     </p>
   )

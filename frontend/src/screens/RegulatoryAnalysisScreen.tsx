@@ -309,7 +309,6 @@ function StreamingAnalysisView({ shouldRunAnalysis }: { shouldRunAnalysis: boole
     lastAnalyze,
     setActiveView,
     riskTopic,
-    riskJurisdiction,
     runAnalyze,
     analyzeError,
     analyzeLoading,
@@ -461,11 +460,6 @@ function StreamingAnalysisView({ shouldRunAnalysis }: { shouldRunAnalysis: boole
             {riskTopic && (
               <>
                 {' '} · <span className="text-neutral-700">{riskTopic}</span>
-              </>
-            )}
-            {riskJurisdiction && (
-              <>
-                {' '} · <JurisdictionBadge jurisdiction={riskJurisdiction} />
               </>
             )}
           </p>
