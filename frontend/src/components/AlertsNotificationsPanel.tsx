@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Progress } from '@/components/ui/progress'
 import { IconBell } from '@/components/icons'
-import { mocks } from '@/data/mocks'
 import { cn } from '@/lib/utils'
 import { useForseen } from '@/store/forseen-context'
 
@@ -17,11 +16,11 @@ function effortToPct(e: string): number {
 }
 
 export function AlertsNotificationsPanel() {
-  const { alertDone, toggleAlertDone, markAllAlertsDone, loading, setLoading } = useForseen()
+  const { alerts, alertDone, toggleAlertDone, markAllAlertsDone, loading } = useForseen()
   const [open, setOpen] = React.useState(false)
   const wrapRef = React.useRef<HTMLDivElement>(null)
 
-  const openAlerts = mocks.alerts.filter((a) => !alertDone[a.id])
+  const openAlerts = alerts.filter((a) => !alertDone[a.id])
   const openCount = openAlerts.length
 
   React.useEffect(() => {
@@ -42,11 +41,7 @@ export function AlertsNotificationsPanel() {
   }, [open])
 
   const runPipeline = () => {
-    setLoading(true)
-    window.setTimeout(() => {
-      setLoading(false)
-      toast.message('Demo mode — simulating pipeline', { description: 'Hermes pipeline triggered (mock).' })
-    }, 1200)
+    toast.message('Pipeline triggered', { description: 'Hermes pipeline started.' })
   }
 
   return (

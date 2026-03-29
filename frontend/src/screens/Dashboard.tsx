@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { ProbabilityGauge } from '@/components/ProbabilityGauge'
 import { IconArrowRight, IconChevronDown } from '@/components/icons'
 import { cn } from '@/lib/utils'
@@ -251,31 +250,6 @@ export function Dashboard() {
           </ul>
         </div>
       </div>
-
-      <Card className="border-neutral-200">
-        <CardHeader>
-          <CardTitle className="text-base">Priority actions</CardTitle>
-          <p className="text-sm text-neutral-500">Top Hermes-style tasks for the next sprint.</p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {priorityRows.map((a, i) => (
-            <label
-              key={a.label}
-              className="flex cursor-pointer items-start gap-3 rounded-2xl border border-neutral-200/60 bg-[color:var(--color-muted-surface)] p-4 transition-colors hover:bg-neutral-100/80"
-            >
-              <Checkbox checked={!!priorityActionsChecked[i]} onCheckedChange={() => togglePriorityAction(i)} />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-light">{a.label}</span>
-                  <Badge variant={a.level === 'High' ? 'default' : 'secondary'} className="text-[10px]">
-                    {a.level}
-                  </Badge>
-                </div>
-              </div>
-            </label>
-          ))}
-        </CardContent>
-      </Card>
     </div>
   )
 }
