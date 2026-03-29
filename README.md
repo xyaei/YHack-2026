@@ -1,12 +1,12 @@
-# Forseen 🔮
+# Forseen 
 
 **Your guided path through regulatory complexity**
 
-Forseen turns a structured company profile into **actionable compliance intelligence**. Capture how your organization operates, run a **regulatory analysis** grounded in real signals from MongoDB, and explore results on a live dashboard—with optional **RAG chat** for deeper questions.
+Forseen turns a structured company profile into **actionable compliance intelligence**. Capture how your organization operates, run a **regulatory analysis** grounded in real signals from MongoDB, and explore results on a live dashboard—with **RAG chat** for deeper questions.
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Guided company setup:** Multi-step profile (identity, scale, data practices, operating states) with validation and persisted session
 - **Regulatory analysis pipeline:** Topic-driven `/analyze` flow that fetches signals, runs **K2** predictions, and generates **Hermes** reports
@@ -17,7 +17,7 @@ Forseen turns a structured company profile into **actionable compliance intellig
 
 ---
 
-## 🛠️ Built With
+## Built With
 
 ### AI & orchestration
 
@@ -48,7 +48,7 @@ Forseen turns a structured company profile into **actionable compliance intellig
 
 ---
 
-## 🎯 How It Works
+## How It Works
 
 1. **Profile:** Complete company setup (legal structure, industry, HQ, operating states, data handling, etc.)
 2. **Analyze:** Enter a regulatory **topic**; the backend pulls relevant **signals** from Mongo, calls **K2**, then **Hermes**
@@ -57,7 +57,7 @@ Forseen turns a structured company profile into **actionable compliance intellig
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 # Clone the repository
@@ -77,7 +77,7 @@ cd frontend && npm install && cd ..
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 From the **repository root**:
 
@@ -140,7 +140,7 @@ Clear split: **frontend** (React), **backend** (orchestration), **model_servers*
 
 ---
 
-## 🔧 API documentation
+## API documentation
 
 Full reference: **[backend/API.md](backend/API.md)**  
 
@@ -176,42 +176,14 @@ Responses include **predictions**, **signals**, and **report** payloads consumed
 
 ---
 
-## 🤝 Contributing
-
-1. Fork the repository  
-2. Create a branch (`git checkout -b feature/your-feature`)  
-3. Commit with clear messages  
-4. Push and open a **Pull Request**
-
-Internal docs: **[readme/README.md](readme/README.md)** (architecture), **[readme/FILE_INDEX.md](readme/FILE_INDEX.md)** (file map).
-
----
-
-## 📄 License
-
-Specify a license for your fork (e.g. MIT). Add a `LICENSE` file at the repo root when you publish.
-
----
-
 ## 🙏 Acknowledgments
 
 - Built for **YHack 2026**  
 - Thanks to instructors, mentors, and sponsors supporting the hackathon  
-- Signal and model pipelines stand on open tools and APIs configured in your environment
 
 ---
 
-## 📞 Contact
-
-Replace with your team’s details:
-
-- **Team:** _Your names_  
-- **Email:** _your@email_  
-- **Project link:** `https://github.com/<org>/YHack-2026`
-
----
-
-## 🚀 Future roadmap
+## Future roadmap
 
 - [ ] Harden auth and multi-tenant company profiles  
 - [ ] CI (lint, typecheck, tests) on PRs  
@@ -220,5 +192,3 @@ Replace with your team’s details:
 - [ ] Mobile-friendly analysis summaries  
 
 ---
-
-**Stop guessing what applies—see it in context.** 🔮
