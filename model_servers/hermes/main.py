@@ -185,3 +185,87 @@ async def report(req: ReportRequest):
 @app.get("/health")
 def health():
     return {"status": "ok", "model": HERMES_MODEL, "base_url": HERMES_BASE_URL}
+
+
+# ── Chat endpoint ─────────────────────────────────────────────────────────────
+
+CHAT_SYSTEM_PROMPT = """\
+You are a regulatory intelligence assistant for Foreseen, a platform that tracks and predicts regulatory changes.
+You have access to real regulatory signals and AI-generated predictions about upcoming regulations.
+Answer the user's question using the provided context. Be concise, plain-English, and specific.
+If the context doesn't cover the question, say so honestly rather than guessing.\
+"""
+
+
+class ChatMessage(BaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
+
+class ChatRequest(BaseModel):
+    message: str
+    history: List[ChatMessage] = []
+    signals: List[dict] = []
+    predictions: List[dict] = []
+    company_context: Optional[str] = None
+
+
+class ChatResponse(BaseModel):
+    reply: str
+
+
+def build_context_block(signals: List[dict], predictions: List[dict], company_context: Optional[str]) -> str:
+    parts = []
+
+    if company_context:
+        parts.append(f"COMPANY CONTEXT:\n{company_context}")
+
+    if predictions:
+        lines = ["RECENT REGULATORY PREDICTIONS:"]
+        for p in predictions:
+            prob = int(p.get("probability_12mo", 0) * 100)
+            lines.append(
+                f"- {p.get('topic')} ({p.get('jurisdiction')}): "
+                f"{prob}% likely in 12 months, confidence={p.get('confidence')}. "
+                f"Reasoning: {p.get('reasoning', '')[:200]}"
+            )
+        parts.append("\n".join(lines))
+
+    if signals:
+        lines = ["RELEVANT REGULATORY SIGNALS:"]
+        for s in signals[:6]:
+            lines.append(
+                f"- [{s.get('jurisdiction', 'N/A')}] {s.get('title', '')} "
+                f"(score={s.get('similarity_score', '')}): {s.get('summary', '')[:150]}"
+            )
+        parts.append("\n".join(lines))
+
+    return "\n\n".join(parts)
+
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat(req: ChatRequest):
+    context = build_context_block(req.signals, req.predictions, req.company_context)
+
+    system = CHAT_SYSTEM_PROMPT
+    if context:
+        system += f"\n\n{context}"
+
+    messages = [{"role": "system", "content": system}]
+    for m in req.history:
+        messages.append({"role": m.role, "content": m.content})
+    messages.append({"role": "user", "content": req.message})
+
+    try:
+        response = client.chat.completions.create(
+            model=HERMES_MODEL,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=1000,
+            stream=False,
+        )
+        reply = response.choices[0].message.content.strip()
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Hermes API error: {e}")
+
+    return ChatResponse(reply=reply)

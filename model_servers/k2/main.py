@@ -117,7 +117,7 @@ JURISDICTION: {req.jurisdiction}
 
 REGULATORY SIGNALS:{signals_text}
 
-Return ONLY a JSON object with this exact structure (replace example values with real ones):
+Return ONLY a JSON object with this exact structure. All string values must be real, substantive content — do NOT use placeholder text, ellipsis, or empty strings:
 {{
   "topic": "{req.topic}",
   "jurisdiction": "{req.jurisdiction}",
@@ -125,17 +125,17 @@ Return ONLY a JSON object with this exact structure (replace example values with
   "probability_12mo": 0.65,
   "probability_24mo": 0.80,
   "confidence": "medium",
-  "likely_requirements": ["example requirement 1", "example requirement 2"],
-  "reasoning": "detailed chain of thought explaining the prediction",
+  "likely_requirements": ["specific requirement based on signals", "another concrete requirement"],
+  "reasoning": "2-5 sentences of actual analysis explaining the probability estimates based on the signals and company profile",
   "key_signals": [
-    {{"signal_id": "example signal title", "weight": 0.85, "rationale": "why this signal matters"}}
+    {{"signal_id": "actual signal title from above", "weight": 0.85, "rationale": "specific reason this signal drives the prediction"}}
   ],
-  "counterfactors": ["factor that could delay or prevent regulation"],
-  "recommended_preparation": ["concrete action to take now"]
+  "counterfactors": ["specific factor that could delay or prevent this regulation"],
+  "recommended_preparation": ["concrete action this company should take now"]
 }}"""
 
 
-REQUIRED_FIELDS = {"topic", "jurisdiction", "probability_6mo", "probability_12mo", "confidence"}
+REQUIRED_FIELDS = {"topic", "jurisdiction", "probability_6mo", "probability_12mo", "probability_24mo", "confidence", "reasoning"}
 
 def extract_json(text: str) -> dict:
     # Strip <think>...</think> / <thinking>...</thinking> reasoning blocks

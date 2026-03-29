@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import predictions, reports, analyze
+from routers import predictions, reports, analyze, chat
 
 app = FastAPI(title="Forseen API", version="0.1.0")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 app.include_router(predictions.router)
 app.include_router(reports.router)
 app.include_router(analyze.router)
+app.include_router(chat.router)
 
 
 @app.get("/health")
