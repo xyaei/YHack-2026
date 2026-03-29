@@ -191,7 +191,7 @@ class DecomposeRequest(BaseModel):
     jurisdiction: str
     company: CompanyProfile
     signals: Optional[List[dict]] = []
-    max_sub_topics: int = 5
+    max_sub_topics: int = 3
 
 
 class SubTopic(BaseModel):

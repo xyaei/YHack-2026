@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { toast } from 'sonner'
 import { motion, useInView } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -547,7 +546,6 @@ export function SetupScreen() {
 
   const saveProfile = () => {
     setCompany(buildCompany())
-    toast.success('Profile saved — demo banner updated')
   }
 
   const handleCompleteSetup = () => {
