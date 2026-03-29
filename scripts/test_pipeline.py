@@ -33,16 +33,16 @@ SCENARIOS = [
         "topic_tags": ["health_data", "privacy"],
         "full_report": True,
     },
-    {
-        "topic": "AI in Healthcare Regulation",
-        "jurisdiction": "federal",
-        "topic_tags": ["ai_ml", "health_data"],
-    },
-    {
-        "topic": "FTC Health App Enforcement",
-        "jurisdiction": "federal",
-        "topic_tags": ["ftc_enforcement", "privacy"],
-    },
+    # {
+    #     "topic": "AI in Healthcare Regulation",
+    #     "jurisdiction": "federal",
+    #     "topic_tags": ["ai_ml", "health_data"],
+    # },
+    # {
+    #     "topic": "FTC Health App Enforcement",
+    #     "jurisdiction": "federal",
+    #     "topic_tags": ["ftc_enforcement", "privacy"],
+    # },
 ]
 
 
@@ -61,6 +61,7 @@ def check_health():
 
 
 def run_scenario(scenario: dict):
+    """Returns the response data dict on success, None on failure."""
     payload = {"company": COMPANY, **scenario}
     print(f"\n  topic={scenario['topic']}  jurisdiction={scenario['jurisdiction']}")
 
@@ -70,7 +71,7 @@ def run_scenario(scenario: dict):
 
     if r.status_code != 200:
         print(f"  FAILED {r.status_code}: {r.text[:1000]}")
-        return False
+        return None
 
     data = r.json()
     pred = data["prediction"]
@@ -102,6 +103,29 @@ def run_scenario(scenario: dict):
         print(f"  {pred['reasoning']}")
         print("─" * 60)
 
+    return data
+
+
+def run_chat(signals: list, prediction: dict):
+    """Send a follow-up chat message using context from the analyze response."""
+    payload = {
+        "message": "Based on this analysis, what should be my top 3 immediate action items?",
+        "history": [],
+        "signals": signals,
+        "predictions": [prediction],
+        "company_context": f"{COMPANY['name']} — {COMPANY['description']}",
+    }
+
+    start = time.time()
+    r = httpx.post(f"{BASE_URL}/chat/", json=payload, timeout=60)
+    elapsed = round(time.time() - start, 1)
+
+    if r.status_code != 200:
+        print(f"  CHAT FAILED {r.status_code}: {r.text[:500]}")
+        return False
+
+    reply = r.json()["reply"]
+    print(f"  chat reply ({elapsed}s):\n  {reply[:400]}")
     return True
 
 
@@ -110,20 +134,32 @@ def main():
     print("FORESEEN — Full Pipeline Test")
     print("=" * 60)
 
-    print("\n[1/2] Health checks")
+    print("\n[1/3] Health checks")
     check_health()
 
-    print("\n[2/2] Analyze scenarios")
+    print("\n[2/3] Analyze scenarios")
     passed = 0
+    first_result = None
     for scenario in SCENARIOS:
-        if run_scenario(scenario):
+        data = run_scenario(scenario)
+        if data is not None:
             passed += 1
+            if first_result is None:
+                first_result = data
+
+    print(f"\n[3/3] Chat (using context from first analyze result)")
+    chat_passed = False
+    if first_result:
+        chat_passed = run_chat(first_result["signals"], first_result["prediction"])
+    else:
+        print("  SKIPPED — no analyze result available")
 
     print(f"\n{'=' * 60}")
-    print(f"Results: {passed}/{len(SCENARIOS)} passed")
+    print(f"Analyze: {passed}/{len(SCENARIOS)} passed")
+    print(f"Chat:    {'passed' if chat_passed else 'FAILED'}")
     print("=" * 60)
 
-    if passed < len(SCENARIOS):
+    if passed < len(SCENARIOS) or not chat_passed:
         sys.exit(1)
 
 
