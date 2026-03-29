@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -422,7 +423,8 @@ function StreamingAnalysisView({ shouldRunAnalysis }: { shouldRunAnalysis: boole
 
   const signals = lastAnalyze?.signals ?? []
   const signals_used = lastAnalyze?.signals_used ?? 0
-  const prediction = lastAnalyze?.prediction
+  const predictions = lastAnalyze?.predictions ?? []
+  const prediction = predictions[0]
   const report = lastAnalyze?.report
 
   return (
@@ -542,7 +544,7 @@ function StreamingAnalysisView({ shouldRunAnalysis }: { shouldRunAnalysis: boole
 
         {/* Analysis Results - Streams in progressively */}
         <AnimatePresence>
-          {showPredictions && prediction && (
+          {showPredictions && predictions.length > 0 && (
             <motion.section
               className="mb-10 md:mb-14"
               initial={{ opacity: 0, y: 20 }}
@@ -550,85 +552,63 @@ function StreamingAnalysisView({ shouldRunAnalysis }: { shouldRunAnalysis: boole
               transition={{ duration: 0.5 }}
             >
               <h2 className="text-lg font-medium text-neutral-800 mb-6">
-                Analysis Results
+                Analysis Results ({predictions.length} prediction{predictions.length !== 1 ? 's' : ''})
               </h2>
 
-              {/* Probability Cards */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <ProbabilityCard
-                  period="6 months"
-                  probability={prediction.probability_6mo}
-                  delay={0}
-                />
-                <ProbabilityCard
-                  period="12 months"
-                  probability={prediction.probability_12mo}
-                  delay={0.15}
-                />
-                <ProbabilityCard
-                  period="24 months"
-                  probability={prediction.probability_24mo}
-                  delay={0.3}
-                />
-              </div>
-
-              {/* Confidence & Topic */}
-              <motion.div
-                className="mb-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Card className="border-neutral-200/60 bg-[color:var(--color-elevated)]">
-                  <CardContent className="p-4">
-                    <div className="flex flex-wrap items-center gap-4">
-                      <div>
-                        <p className="text-xs text-neutral-500 mb-1">Confidence</p>
-                        <p className="text-sm font-medium text-neutral-800">{prediction.confidence}</p>
-                      </div>
-                      <div className="h-8 w-px bg-neutral-200" />
-                      <div>
-                        <p className="text-xs text-neutral-500 mb-1">Topic</p>
-                        <p className="text-sm font-medium text-neutral-800">{prediction.topic}</p>
-                      </div>
-                      <div className="h-8 w-px bg-neutral-200" />
-                      <div>
-                        <p className="text-xs text-neutral-500 mb-1">Jurisdiction</p>
-                        <p className="text-sm font-medium text-neutral-800">{prediction.jurisdiction}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        {/* Likely Requirements */}
-        <AnimatePresence>
-          {showRequirements && prediction && prediction.likely_requirements && prediction.likely_requirements.length > 0 && (
-            <motion.section
-              className="mb-10 md:mb-14"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h3 className="text-sm font-medium text-neutral-700 mb-3">
-                Likely Requirements
-              </h3>
-              <div className="space-y-2">
-                {prediction.likely_requirements.slice(0, 3).map((req, idx) => (
+              <div className="space-y-8">
+                {predictions.map((pred, pIdx) => (
                   <motion.div
-                    key={idx}
-                    className="flex items-start gap-2 rounded-lg bg-neutral-50 p-3 text-sm text-neutral-600"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
+                    key={pIdx}
+                    className="rounded-2xl border border-neutral-200/60 bg-[color:var(--color-elevated)] p-5"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: pIdx * 0.15 }}
                   >
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent-muted)] text-xs font-medium text-[color:var(--color-accent)]">
-                      {idx + 1}
-                    </span>
-                    <span>{req}</span>
+                    {/* Topic & Jurisdiction header */}
+                    <div className="mb-4 flex flex-wrap items-center gap-3">
+                      <h3 className="text-base font-medium text-neutral-800">{pred.topic}</h3>
+                      <Badge variant="secondary" className="text-xs">{pred.jurisdiction}</Badge>
+                      <Badge variant={pred.confidence === 'high' ? 'default' : 'outline'} className="text-xs capitalize">{pred.confidence}</Badge>
+                    </div>
+
+                    {/* Probability Cards */}
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <ProbabilityCard
+                        period="6 months"
+                        probability={pred.probability_6mo}
+                        delay={0}
+                      />
+                      <ProbabilityCard
+                        period="12 months"
+                        probability={pred.probability_12mo}
+                        delay={0.1}
+                      />
+                      <ProbabilityCard
+                        period="24 months"
+                        probability={pred.probability_24mo}
+                        delay={0.2}
+                      />
+                    </div>
+
+                    {/* Likely Requirements */}
+                    {pred.likely_requirements && pred.likely_requirements.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-xs font-medium text-neutral-500 mb-2">Likely Requirements</p>
+                        <div className="space-y-1.5">
+                          {pred.likely_requirements.slice(0, 3).map((req, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-2 rounded-lg bg-neutral-50 p-2.5 text-sm text-neutral-600"
+                            >
+                              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent-muted)] text-xs font-medium text-[color:var(--color-accent)]">
+                                {idx + 1}
+                              </span>
+                              <span>{req}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </div>

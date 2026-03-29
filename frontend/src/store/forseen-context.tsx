@@ -122,15 +122,24 @@ export function ForseenProvider({ children }: { children: React.ReactNode }) {
     lastAnalyze,
   ])
 
-  const liveDetail = React.useMemo(
-    () => (lastAnalyze ? apiPredictionToDetail(lastAnalyze.prediction, lastAnalyze.signals) : undefined),
-    [lastAnalyze],
+  // Support both old persisted shape (singular `prediction`) and new (plural `predictions`)
+  const analyzePredictions = React.useMemo(() => {
+    if (!lastAnalyze) return []
+    if (lastAnalyze.predictions?.length) return lastAnalyze.predictions
+    const legacy = (lastAnalyze as any).prediction
+    if (legacy) return [legacy]
+    return []
+  }, [lastAnalyze])
+
+  const liveDetails = React.useMemo(
+    () => analyzePredictions.map((p, i) => apiPredictionToDetail(p, lastAnalyze?.signals ?? [], LIVE_PREDICTION_ID + i)),
+    [analyzePredictions, lastAnalyze],
   )
 
   const displayPredictions = React.useMemo((): Prediction[] => {
-    if (lastAnalyze) return [apiPredictionToUi(lastAnalyze.prediction)]
+    if (analyzePredictions.length) return analyzePredictions.map((p, i) => apiPredictionToUi(p, LIVE_PREDICTION_ID + i))
     return mocks.predictions
-  }, [lastAnalyze])
+  }, [analyzePredictions])
 
   const signalsTrackedCount = React.useMemo(() => {
     if (lastAnalyze) return lastAnalyze.signals_used
@@ -146,10 +155,13 @@ export function ForseenProvider({ children }: { children: React.ReactNode }) {
 
   const getPredictionDetail = React.useCallback(
     (id: number): PredictionDetail | undefined => {
-      if (lastAnalyze && id === LIVE_PREDICTION_ID) return liveDetail
+      if (lastAnalyze) {
+        const detail = liveDetails.find((d) => d.predictionId === id)
+        if (detail) return detail
+      }
       return mocks.predictionDetails[id as keyof typeof mocks.predictionDetails]
     },
-    [lastAnalyze, liveDetail],
+    [lastAnalyze, liveDetails],
   )
 
   const refreshMocks = React.useCallback(() => {

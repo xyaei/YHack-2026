@@ -186,6 +186,113 @@ async def predict(req: PredictionRequest):
     return PredictionResponse(**data)
 
 
+class DecomposeRequest(BaseModel):
+    topic: str
+    jurisdiction: str
+    company: CompanyProfile
+    signals: Optional[List[dict]] = []
+    max_sub_topics: int = 5
+
+
+class SubTopic(BaseModel):
+    topic: str
+    jurisdiction: str
+
+
+class DecomposeResponse(BaseModel):
+    sub_topics: List[SubTopic]
+
+
+DECOMPOSE_SYSTEM = """\
+You are a regulatory analyst. Given a broad regulatory topic, a jurisdiction, and a company profile,
+identify distinct regulatory sub-topics that are relevant to this company. Each sub-topic should
+represent a separate, concrete regulatory area that could produce its own prediction.
+Return ONLY valid JSON — no prose, no markdown fences.\
+"""
+
+
+def build_decompose_prompt(req: DecomposeRequest) -> str:
+    c = req.company
+    signals_text = ""
+    for i, s in enumerate(req.signals[:10]):
+        signals_text += f"\n[{i+1}] {s.get('title', 'Untitled')}: {s.get('summary', '')}"
+    if not signals_text:
+        signals_text = "\nNo signals provided."
+
+    return f"""Given the broad topic "{req.topic}" in jurisdiction "{req.jurisdiction}", identify up to {req.max_sub_topics} distinct, specific regulatory sub-topics relevant to this company.
+
+COMPANY
+Name: {c.name}
+Industry: {c.industry}
+Size: {c.size} employees
+Description: {c.description}
+Handles PHI: {c.handles_phi} | PII: {c.handles_pii} | Financial data: {c.handles_financial_data}
+Uses AI/ML: {c.uses_ai_ml}
+Operating states: {', '.join(c.operating_states) or 'N/A'}
+
+REGULATORY SIGNALS:{signals_text}
+
+Return a JSON object with this exact structure:
+{{
+  "sub_topics": [
+    {{"topic": "specific regulatory sub-topic name", "jurisdiction": "{req.jurisdiction}"}},
+    {{"topic": "another specific sub-topic", "jurisdiction": "{req.jurisdiction}"}}
+  ]
+}}
+
+Rules:
+- Each sub-topic must be a specific, distinct regulatory area (not the original broad topic restated)
+- Only include sub-topics genuinely relevant to this company's profile
+- Return between 2 and {req.max_sub_topics} sub-topics
+- Use the signals to inform which sub-topics are most relevant right now"""
+
+
+def extract_decompose_json(text: str) -> dict:
+    """Extract a JSON object containing 'sub_topics' from LLM output."""
+    text = re.sub(r"<think(?:ing)?>[\s\S]*?</think(?:ing)?>", "", text).strip()
+    text = re.sub(r"^```(?:json)?\s*", "", text.strip())
+    text = re.sub(r"\s*```$", "", text.strip())
+    decoder = json.JSONDecoder()
+    pos = 0
+    while True:
+        start = text.find("{", pos)
+        if start == -1:
+            break
+        try:
+            obj, _ = decoder.raw_decode(text, start)
+            if isinstance(obj, dict) and "sub_topics" in obj:
+                return obj
+        except json.JSONDecodeError:
+            pass
+        pos = start + 1
+    raise ValueError(f"No valid decompose JSON found in response: {text[:300]}")
+
+
+@app.post("/decompose", response_model=DecomposeResponse)
+async def decompose(req: DecomposeRequest):
+    try:
+        response = client.chat.completions.create(
+            model=K2_MODEL,
+            messages=[
+                {"role": "system", "content": DECOMPOSE_SYSTEM},
+                {"role": "user", "content": build_decompose_prompt(req)},
+            ],
+            temperature=0.3,
+            max_tokens=1000,
+            stream=False,
+        )
+        raw_text = response.choices[0].message.content
+        print(f"[decompose] raw LLM response: {raw_text[:500]}", flush=True)
+        data = extract_decompose_json(raw_text)
+    except Exception as e:
+        print(f"[decompose] ERROR: {e}", flush=True)
+        raise HTTPException(status_code=502, detail=f"K2 decompose error: {e}")
+
+    return DecomposeResponse(
+        sub_topics=[SubTopic(**st) for st in data.get("sub_topics", [])]
+    )
+
+
 @app.get("/health")
 def health():
     return {"status": "ok", "model": K2_MODEL, "base_url": K2_BASE_URL}

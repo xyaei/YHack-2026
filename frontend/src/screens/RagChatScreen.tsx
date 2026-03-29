@@ -137,8 +137,8 @@ export function RagChatScreen() {
     }))
 
     const signals = lastAnalyze?.signals ?? undefined
-    const predictions = lastAnalyze?.prediction
-      ? [lastAnalyze.prediction as unknown as Record<string, unknown>]
+    const predictions = lastAnalyze?.predictions?.length
+      ? (lastAnalyze.predictions as unknown as Record<string, unknown>[])
       : undefined
     const company_context = buildCompanyContext(company)
 

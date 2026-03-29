@@ -55,9 +55,10 @@ function findSourceUrl(signalId: string, signals: Record<string, unknown>[]): st
 export function apiPredictionToDetail(
   pred: ApiPrediction,
   signals: Record<string, unknown>[] = [],
+  predictionId: number = LIVE_PREDICTION_ID,
 ): PredictionDetail {
   return {
-    predictionId: LIVE_PREDICTION_ID,
+    predictionId,
     k2Reasoning: pred.reasoning,
     signals: pred.key_signals.map((ks) => ({
       title: ks.signal_id,

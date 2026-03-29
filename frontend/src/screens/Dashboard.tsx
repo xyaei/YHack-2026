@@ -221,10 +221,12 @@ export function Dashboard() {
                 className="p-4 md:p-5"
               >
                 <div className="flex flex-col">
-                  <button
-                    type="button"
-                    className="flex w-full items-start justify-between gap-3 rounded-xl p-1 text-left transition-colors hover:bg-neutral-50/80"
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className="flex w-full items-start justify-between gap-3 rounded-xl p-1 text-left transition-colors hover:bg-neutral-50/80 cursor-pointer"
                     onClick={() => togglePrediction(p.id)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePrediction(p.id) } }}
                     aria-expanded={isOpen}
                   >
                     <div className="min-w-0 flex-1 space-y-2">
@@ -257,7 +259,7 @@ export function Dashboard() {
                         aria-hidden
                       />
                     </div>
-                  </button>
+                  </div>
 
                   <AnimatePresence initial={false}>
                     {isOpen && (

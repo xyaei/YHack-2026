@@ -34,7 +34,7 @@ export type ApiReport = {
 export type AnalyzeResponse = {
   signals: Record<string, unknown>[]
   signals_used: number
-  prediction: ApiPrediction
+  predictions: ApiPrediction[]
   report: ApiReport
 }
 
