@@ -313,7 +313,12 @@ export function SetupScreen() {
   const [industry, setIndustry] = React.useState(company.industry)
   const [description, setDescription] = React.useState(company.description)
   const [location, setLocation] = React.useState(company.location)
-  const [size, setSize] = React.useState([company.size])
+  const SIZE_STOPS = [1, 10, 25, 50, 100, 250, 500, 1000] as const
+  const toSizeIndex = (val: number) => {
+    const idx = SIZE_STOPS.indexOf(val as any)
+    return idx >= 0 ? idx : 0
+  }
+  const [sizeIndex, setSizeIndex] = React.useState([toSizeIndex(company.size)])
   const [revenueRange, setRevenueRange] = React.useState<string | null>(company.revenue_range)
   const [operatingStates, setOperatingStates] = React.useState<string[]>(company.operating_states)
   const [handlesPii, setHandlesPii] = React.useState(company.handles_pii)
@@ -334,7 +339,7 @@ export function SetupScreen() {
     setIndustry(company.industry)
     setDescription(company.description)
     setLocation(company.location)
-    setSize([company.size])
+    setSizeIndex([toSizeIndex(company.size)])
     setRevenueRange(company.revenue_range)
     setOperatingStates(company.operating_states)
     setHandlesPii(company.handles_pii)
@@ -403,7 +408,7 @@ export function SetupScreen() {
       name: name.trim() || 'Untitled company',
       legal_structure: legalStructure,
       industry,
-      size: size[0],
+      size: SIZE_STOPS[sizeIndex[0]],
       revenue_range: revenueRange,
       location: location.trim() || '—',
       operating_states: operatingStates.length ? operatingStates : ['CA'],
@@ -677,9 +682,9 @@ export function SetupScreen() {
             <motion.div variants={fadeInUp} className="space-y-4">
               <div className="flex justify-between">
                 <Label>Company size (employees)</Label>
-                <span className="text-sm font-medium tabular-nums text-[color:var(--color-accent)]">{size[0]}</span>
+                <span className="text-sm font-medium tabular-nums text-[color:var(--color-accent)]">{SIZE_STOPS[sizeIndex[0]].toLocaleString()}</span>
               </div>
-              <Slider value={size} onValueChange={setSize} min={1} max={500} step={1} />
+              <Slider value={sizeIndex} onValueChange={setSizeIndex} min={0} max={SIZE_STOPS.length - 1} step={1} />
             </motion.div>
             <motion.div variants={fadeInUp} className="space-y-2.5">
               <Label htmlFor="co-rev">Revenue range</Label>
@@ -882,7 +887,7 @@ export function SetupScreen() {
                 <p className="text-sm font-medium text-neutral-700">Scale & Operations</p>
               </div>
               <div className="space-y-2 text-sm text-neutral-600">
-                <p>~{size[0]} employees</p>
+                <p>~{SIZE_STOPS[sizeIndex[0]].toLocaleString()} employees</p>
                 {revenueRange && <p>Revenue: {revenueRange}</p>}
                 <p>States: {operatingStates.join(', ') || '—'}</p>
               </div>

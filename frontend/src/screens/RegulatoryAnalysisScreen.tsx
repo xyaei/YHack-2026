@@ -55,9 +55,13 @@ function ModelBadge({
   )
 }
 
+function stripHtml(text: string) {
+  return text.replace(/<[^>]+>/g, '').trim()
+}
+
 function SignalCard({ signal, delay = 0 }: { signal: Record<string, unknown>; delay?: number }) {
-  const title = (signal.title as string) || (signal.name as string) || 'Untitled Document'
-  const summary = (signal.summary as string) || (signal.content as string) || 'No summary available'
+  const title = stripHtml((signal.title as string) || (signal.name as string) || 'Untitled Document')
+  const summary = stripHtml((signal.summary as string) || (signal.content as string) || 'No summary available')
   const sourceUrl = signal.source_url as string | undefined
   const jurisdiction = (signal.jurisdiction as string) || 'Federal'
 

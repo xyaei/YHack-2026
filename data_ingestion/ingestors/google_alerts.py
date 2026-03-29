@@ -1,3 +1,4 @@
+import re
 import feedparser
 from datetime import datetime, timezone
 from pymongo import MongoClient
@@ -67,6 +68,10 @@ TOPIC_KEYWORDS = {
     "hipaa":           ["HIPAA", "health insurance", "protected health information"],
 }
 
+def strip_html(text):
+    """Remove HTML tags from text."""
+    return re.sub(r"<[^>]+>", "", text).strip()
+
 def classify_topics(title, summary, default_topics=None):
     text = f"{title} {summary}".lower()
     matched = []
@@ -84,8 +89,8 @@ def fetch_google_news():
             inserted = 0
 
             for entry in feed.entries:
-                title = entry.get("title", "")
-                summary = entry.get("summary", "") or entry.get("description", "")
+                title = strip_html(entry.get("title", ""))
+                summary = strip_html(entry.get("summary", "") or entry.get("description", ""))
                 url = entry.get("link", "")
 
                 if not url or not title:
