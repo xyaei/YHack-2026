@@ -7,7 +7,15 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { ProbabilityGauge } from '@/components/ProbabilityGauge'
 import { IconArrowRight, IconChevronDown } from '@/components/icons'
 import { cn } from '@/lib/utils'
+import { sortStateCodes } from '@/lib/us-states'
 import { useForseen } from '@/store/forseen-context'
+
+function formatOperatingStatesForProfile(states: string[]) {
+  const n = states.length
+  if (n === 0) return 'No operating states listed'
+  if (n > 5) return `${n} operating state${n === 1 ? '' : 's'}`
+  return sortStateCodes(states).join(', ')
+}
 
 function confidenceVariant(c: string): 'success' | 'secondary' | 'outline' {
   if (c === 'High') return 'success'
@@ -84,7 +92,8 @@ export function Dashboard() {
             <p className="text-xs font-light uppercase tracking-wider text-neutral-500">Company profile</p>
             <h1 className="text-xl font-light tracking-tight text-neutral-800">{company.name}</h1>
             <p className="text-sm text-neutral-600">
-              {company.industry} · {company.size} employees · {company.operating_states.join(', ')}
+              {company.industry} · {company.size} employees ·{' '}
+              {formatOperatingStatesForProfile(company.operating_states)}
             </p>
             {company.description.trim() ? (
               <p className="text-sm leading-snug text-neutral-700">{company.description.trim()}</p>

@@ -80,7 +80,7 @@ function initialFromStorage(): PersistedSession | null {
       p.priorityActionsChecked && typeof p.priorityActionsChecked === 'object'
         ? { ...p.priorityActionsChecked }
         : { 0: false, 1: false, 2: false },
-    riskTopic: typeof p.riskTopic === 'string' ? p.riskTopic : 'State health data privacy',
+    riskTopic: typeof p.riskTopic === 'string' ? p.riskTopic : '',
     riskJurisdiction: typeof p.riskJurisdiction === 'string' ? p.riskJurisdiction : 'CA',
     lastAnalyze: p.lastAnalyze ?? null,
   }
@@ -96,7 +96,7 @@ export function ForseenProvider({ children }: { children: React.ReactNode }) {
   const [priorityActionsChecked, setPriorityActionsChecked] = React.useState<Record<number, boolean>>(
     () => stored?.priorityActionsChecked ?? { 0: false, 1: false, 2: false },
   )
-  const [riskTopic, setRiskTopic] = React.useState(() => stored?.riskTopic ?? 'State health data privacy')
+  const [riskTopic, setRiskTopic] = React.useState(() => stored?.riskTopic ?? '')
   const [riskJurisdiction, setRiskJurisdiction] = React.useState(() => stored?.riskJurisdiction ?? 'CA')
   const [lastAnalyze, setLastAnalyze] = React.useState<AnalyzeResponse | null>(() =>
     normalizeAnalyzeResponse(stored?.lastAnalyze ?? null),

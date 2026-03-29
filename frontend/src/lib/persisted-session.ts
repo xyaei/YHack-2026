@@ -4,8 +4,8 @@ import type { AnalyzeResponse } from '@/lib/api'
 /** Matches `AppView` in forseen-context (avoid circular imports) */
 export type PersistedAppView = 'dashboard' | 'rag' | 'setup' | 'analysis'
 
-/** Bump when persisted shape changes; v2 migrates v1 sessions (see loadPersistedSession). */
-const PERSISTED_SESSION_VERSION = 2
+/** Bump when persisted shape changes; see loadPersistedSession for migrations. */
+const PERSISTED_SESSION_VERSION = 3
 /** RAG history is versioned independently so main session bumps do not wipe chat. */
 const RAG_STORAGE_VERSION = 1
 const SESSION_KEY = 'forseen.session.v1'
@@ -43,6 +43,19 @@ export function loadPersistedSession(): Partial<PersistedSession> | null {
     // Former default was example copy "San Francisco, CA" — empty so placeholder shows (re-enter if real HQ).
     if (data.company.location?.trim() === 'San Francisco, CA') {
       data.company = { ...data.company, location: '' }
+    }
+    if (data.riskTopic?.trim() === 'State health data privacy') {
+      data.riskTopic = ''
+    }
+    savePersistedSession(data)
+    return data
+  }
+
+  if (parsed.v === 2) {
+    const data: PersistedSession = { ...parsed.data }
+    // Former default topic was example copy — show placeholder instead (re-enter if that was your real topic).
+    if (data.riskTopic?.trim() === 'State health data privacy') {
+      data.riskTopic = ''
     }
     savePersistedSession(data)
     return data

@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { allStatesSelected, sortStateCodes, US_STATE_CODES } from '@/lib/us-states'
 import { useForseen } from '@/store/forseen-context'
 import { IconArrowRight } from '@/components/icons'
 import {
@@ -27,20 +28,6 @@ import {
   type Company,
   type LegalStructure,
 } from '@/data/mocks'
-
-const US_STATE_CODES = [
-  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
-] as const
-
-const STATE_ORDER = new Map<string, number>(US_STATE_CODES.map((c, i) => [c, i]))
-
-function sortStateCodes(codes: string[]) {
-  return [...codes].sort((a, b) => (STATE_ORDER.get(a) ?? 99) - (STATE_ORDER.get(b) ?? 99))
-}
 
 const SELECT_FIELD_CLASS =
   'flex h-11 w-full cursor-pointer rounded-2xl border border-neutral-200/80 bg-[color:var(--color-elevated)] px-4 text-sm text-[color:var(--color-ink)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/30 focus-visible:border-[color:var(--color-accent)]'
@@ -253,16 +240,18 @@ function OperatingStatesField({
           <DialogTitle>Operating states</DialogTitle>
           <div className="flex items-start justify-between gap-3">
             <DialogDescription className="min-w-0 flex-1 pr-1 text-left">
-              Select every state where you operate. Select all that apply. You can choose more than one.
+              Select every state where you operate.
             </DialogDescription>
             <Button
               type="button"
               variant="secondary"
               size="sm"
               className="shrink-0"
-              onClick={() => onChange(sortStateCodes([...US_STATE_CODES]))}
+              onClick={() =>
+                allStatesSelected(value) ? onChange([]) : onChange(sortStateCodes([...US_STATE_CODES]))
+              }
             >
-              Select all
+              {allStatesSelected(value) ? 'Unselect all' : 'Select all'}
             </Button>
           </div>
         </DialogHeader>
