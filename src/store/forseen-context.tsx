@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { defaultCompany, mocks, type Company } from '@/data/mocks'
 
-export type AppView = 'dashboard' | 'briefing' | 'feedback' | 'rag' | 'setup'
+export type AppView = 'dashboard' | 'rag' | 'setup'
 
 type ForseenContextValue = {
   company: Company

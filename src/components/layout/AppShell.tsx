@@ -3,24 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Toaster } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconFileText,
-  IconLayoutGrid,
-  IconMenu,
-  IconChat,
-  IconRefresh,
-  IconThumbsUp,
-  IconSliders,
-  IconX,
-  LogoGithub,
-} from '@/components/icons'
+import { IconChevronLeft, IconChevronRight, IconMenu, IconRefresh, IconX, LogoGithub } from '@/components/icons'
 import { AlertsNotificationsPanel } from '@/components/AlertsNotificationsPanel'
 import { useForseen, type AppView } from '@/store/forseen-context'
 import { Dashboard } from '@/screens/Dashboard'
-import { BriefingScreen } from '@/screens/BriefingScreen'
-import { FeedbackScreen } from '@/screens/FeedbackScreen'
 import { RagChatScreen } from '@/screens/RagChatScreen'
 import { SetupScreen } from '@/screens/SetupScreen'
 import { DrillDownModal } from '@/components/DrillDownModal'
@@ -82,12 +68,10 @@ function SidebarSocialLinks({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-const nav: { id: AppView; label: string; icon: React.ReactNode }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: <IconLayoutGrid className="size-5 shrink-0" aria-hidden /> },
-  { id: 'setup', label: 'Setup', icon: <IconSliders className="size-5 shrink-0" aria-hidden /> },
-  { id: 'briefing', label: 'Briefings', icon: <IconFileText className="size-5 shrink-0" aria-hidden /> },
-  { id: 'rag', label: 'Chat', icon: <IconChat className="size-5 shrink-0" aria-hidden /> },
-  { id: 'feedback', label: 'Feedback', icon: <IconThumbsUp className="size-5 shrink-0" aria-hidden /> },
+const nav: { id: AppView; label: string }[] = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'setup', label: 'Setup' },
+  { id: 'rag', label: 'Chat' },
 ]
 
 export function AppShell() {
@@ -111,8 +95,8 @@ export function AppShell() {
 
   const navButtonClass = (active: boolean, collapsed: boolean) =>
     cn(
-      'flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-accent)]',
-      collapsed && 'justify-center px-2',
+      'flex w-full items-center rounded-xl border border-transparent px-3 py-2.5 text-sm font-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-accent)]',
+      collapsed ? 'justify-center px-2 text-center text-[11px] leading-snug' : 'text-left',
       active ? 'border-white/25 bg-white/15 text-white' : 'text-white/80 hover:border-white/15 hover:bg-white/10 hover:text-white',
     )
 
@@ -129,7 +113,7 @@ export function AppShell() {
       <aside
         className={cn(
           'fixed left-0 top-0 z-40 hidden h-dvh max-h-dvh flex-col overflow-hidden border-r border-white/10 bg-[color:var(--color-accent)] text-white transition-[width] duration-200 ease-out md:flex',
-          sidebarCollapsed ? 'md:w-14' : 'md:w-56',
+          sidebarCollapsed ? 'md:w-24' : 'md:w-56',
         )}
       >
         <div
@@ -161,8 +145,7 @@ export function AppShell() {
               onClick={() => onNav(item.id)}
               className={navButtonClass(navActive(item.id), sidebarCollapsed)}
             >
-              {item.icon}
-              {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+              <span className={sidebarCollapsed ? 'text-balance break-words text-center' : 'truncate'}>{item.label}</span>
             </button>
           ))}
         </nav>
@@ -174,7 +157,7 @@ export function AppShell() {
       <div
         className={cn(
           'flex min-w-0 flex-1 flex-col transition-[margin] duration-200 ease-out',
-          sidebarCollapsed ? 'md:ml-14' : 'md:ml-56',
+          sidebarCollapsed ? 'md:ml-24' : 'md:ml-56',
           activeView === 'setup' && 'min-h-0 overflow-hidden',
         )}
       >
@@ -239,8 +222,6 @@ export function AppShell() {
           ) : (
             <div className="mx-auto max-w-7xl">
               {activeView === 'dashboard' && <Dashboard />}
-              {activeView === 'briefing' && <BriefingScreen />}
-              {activeView === 'feedback' && <FeedbackScreen />}
             </div>
           )}
         </main>
@@ -251,7 +232,7 @@ export function AppShell() {
             activeView === 'setup' && 'hidden',
           )}
         >
-          Demo Mode — Powered by K2 / Hermes / Hex
+         Powered by K2 / Hermes / Hex
         </footer>
       </div>
 
@@ -264,11 +245,10 @@ export function AppShell() {
               type="button"
               onClick={() => onNav(item.id)}
               className={cn(
-                'flex min-w-[4.5rem] flex-1 flex-col items-center gap-1 px-2 py-2 text-[10px] font-light',
+                'flex min-w-0 flex-1 flex-col items-center justify-center px-1.5 py-2.5 text-center text-[10px] font-light leading-tight',
                 navActive(item.id) ? 'text-[color:var(--color-accent)]' : 'text-neutral-500',
               )}
             >
-              {item.icon}
               {item.label}
             </button>
           ))}
@@ -330,7 +310,6 @@ export function AppShell() {
                     onClick={() => onNav(item.id)}
                     className={navButtonClass(navActive(item.id), false)}
                   >
-                    {item.icon}
                     <span className="truncate">{item.label}</span>
                   </button>
                 ))}

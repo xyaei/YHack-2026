@@ -1,15 +1,12 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Textarea } from '@/components/ui/textarea'
-import { IconThumbsDown, IconThumbsUp, IconX } from '@/components/icons'
+import { IconX } from '@/components/icons'
 import { mocks, type SignalCard, type PrepAction } from '@/data/mocks'
 import { ProbTimeline } from '@/components/ProbTimeline'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
-import { useForseen } from '@/store/forseen-context'
-import { IconArrowRight } from '@/components/icons'
 
 type Props = {
   open: boolean
@@ -18,7 +15,6 @@ type Props = {
 }
 
 export function DrillDownModal({ open, predictionId, onOpenChange }: Props) {
-  const { setActiveView } = useForseen()
   const prediction = predictionId != null ? mocks.predictions.find((p) => p.id === predictionId) : undefined
   const detail =
     predictionId != null ? mocks.predictionDetails[predictionId as keyof typeof mocks.predictionDetails] : undefined
@@ -50,7 +46,12 @@ export function DrillDownModal({ open, predictionId, onOpenChange }: Props) {
             <ProbTimeline prediction={prediction} />
           </div>
 
-          <Accordion type="multiple" defaultValue={['k2', 'signals', 'counter', 'prep']} className="w-full">
+          <Accordion
+            key={predictionId}
+            type="multiple"
+            defaultValue={['k2', 'signals', 'counter', 'prep']}
+            className="w-full"
+          >
             <AccordionItem value="k2">
               <AccordionTrigger>K2 Think v2 model reasoning</AccordionTrigger>
               <AccordionContent>
@@ -59,14 +60,10 @@ export function DrillDownModal({ open, predictionId, onOpenChange }: Props) {
                   type="button"
                   variant="secondary"
                   size="sm"
-                  className="mt-4 gap-1.5"
-                  onClick={() => {
-                    onOpenChange(false)
-                    setActiveView('briefing')
-                  }}
+                  className="mt-4"
+                  onClick={() => toast.message('Model output would open here (demo)', { duration: 4000 })}
                 >
-                  View briefing
-                  <IconArrowRight className="size-3.5" aria-hidden />
+                  Open model output
                 </Button>
               </AccordionContent>
             </AccordionItem>
@@ -123,38 +120,6 @@ export function DrillDownModal({ open, predictionId, onOpenChange }: Props) {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-
-          <div className="mt-8 flex flex-col gap-4 border-t border-neutral-200/60 pt-6 sm:flex-row sm:items-end">
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="icon"
-                aria-label="Thumbs up"
-                onClick={() => toast.success('Thanks — feedback recorded (demo)')}
-              >
-                <IconThumbsUp className="size-4" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                aria-label="Thumbs down"
-                onClick={() => toast.message('Noted — we will tune signals (demo)')}
-              >
-                <IconThumbsDown className="size-4" />
-              </Button>
-            </div>
-            <div className="min-w-0 flex-1 space-y-2">
-              <label htmlFor="drill-comment" className="text-sm font-light">
-                Comment
-              </label>
-              <Textarea id="drill-comment" placeholder="What would make this more actionable?" rows={2} />
-            </div>
-          </div>
-          <div className="mt-4 flex justify-end">
-            <Button variant="accent" onClick={() => toast.success('Comment saved (demo)')}>
-              Save note
-            </Button>
-          </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
+import { cn } from '@/lib/utils'
 import { useForseen } from '@/store/forseen-context'
 import { IconArrowRight } from '@/components/icons'
 import { Card, CardContent } from '@/components/ui/card'
@@ -138,7 +139,12 @@ export function SetupScreen() {
 
   return (
     <div className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col overflow-hidden px-0 py-3 md:py-6">
-      <div className="mb-6 shrink-0 text-center md:mb-8 md:text-left">
+      <div
+        className={cn(
+          'shrink-0 text-center md:text-left',
+          step === 6 ? 'mb-5 md:mb-6' : 'mb-6 md:mb-8',
+        )}
+      >
         <h1 className="text-2xl font-light tracking-tight text-neutral-800 md:text-3xl">
           {step === 6 ? 'You’re in' : 'Business profile setup'}
         </h1>
@@ -425,9 +431,9 @@ export function SetupScreen() {
       )}
 
       {step === 6 && (
-        <div className="flex min-h-0 flex-1 flex-col justify-center gap-8 md:gap-10">
-          <div>
-            <p className="mb-3 text-center text-xs font-medium uppercase tracking-[0.2em] text-neutral-400 md:text-left">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="space-y-4 md:space-y-5">
+            <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-neutral-400 md:text-left">
               Start here
             </p>
             <div className="grid gap-4 sm:grid-cols-2">

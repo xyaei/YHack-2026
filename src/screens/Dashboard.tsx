@@ -53,6 +53,16 @@ function MockSourcesCaption() {
 export function Dashboard() {
   const { company, setDrillPredictionId, setActiveView, priorityActionsChecked, togglePriorityAction } = useForseen()
   const [expanded, setExpanded] = React.useState(true)
+  const [predictionOpen, setPredictionOpen] = React.useState<Set<number>>(() => new Set(mocks.predictions.map((p) => p.id)))
+
+  const togglePrediction = (id: number) => {
+    setPredictionOpen((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   return (
     <div className="space-y-8">
@@ -139,7 +149,9 @@ export function Dashboard() {
         <h2 className="mb-4 text-lg font-light tracking-tight">Predictions</h2>
         <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-[color:var(--color-elevated)]">
           <ul className="divide-y divide-neutral-200" role="list">
-            {mocks.predictions.map((p) => (
+            {mocks.predictions.map((p) => {
+              const isOpen = predictionOpen.has(p.id)
+              return (
               <motion.li
                 key={p.id}
                 layout
@@ -148,11 +160,16 @@ export function Dashboard() {
                 transition={{ duration: 0.2 }}
                 className="p-4 md:p-5"
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-8">
-                  <div className="min-w-0 flex-1 space-y-3">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    className="flex w-full items-start justify-between gap-3 rounded-xl p-1 text-left transition-colors hover:bg-neutral-50/80"
+                    onClick={() => togglePrediction(p.id)}
+                    aria-expanded={isOpen}
+                  >
+                    <div className="min-w-0 flex-1 space-y-2">
                       <h3 className="text-base font-light leading-snug text-neutral-800">{p.topic}</h3>
-                      <div className="flex flex-wrap justify-end gap-1">
+                      <div className="flex flex-wrap gap-1">
                         {p.jurisdictions.slice(0, 2).map((j) => (
                           <Badge key={j} variant="secondary" className="text-[10px]">
                             {j}
@@ -164,33 +181,62 @@ export function Dashboard() {
                           </Badge>
                         )}
                       </div>
+                      {!isOpen && (
+                        <p className="text-sm tabular-nums text-neutral-600">
+                          12-month probability · {Math.round(p.prob12mo * 100)}%
+                        </p>
+                      )}
                     </div>
-                    <ProbabilityGauge value={p.prob12mo} />
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-neutral-500">Confidence</span>
-                      <Badge variant={confidenceVariant(p.confidence)}>{p.confidence}</Badge>
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1 border-t border-neutral-100 pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-                    <p className="mb-2 text-xs font-light uppercase tracking-wide text-neutral-500">Likely requirements</p>
-                    <ul className="space-y-1.5 text-sm text-neutral-700">
-                      {p.requirements.map((r) => (
-                        <li key={r} className="flex gap-2">
-                          <span className="mt-1.5 size-1.5 shrink-0 bg-[color:var(--color-accent)]" aria-hidden />
-                          <span>{r}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="flex shrink-0 flex-wrap gap-2 border-t border-neutral-100 pt-4 lg:flex-col lg:justify-center lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-                    <Button variant="accent" size="sm" className="gap-1" onClick={() => setDrillPredictionId(p.id)}>
-                      View actions
-                      <IconArrowRight className="size-3.5" aria-hidden />
-                    </Button>
-                  </div>
+                    <IconChevronDown
+                      className={cn('mt-0.5 size-5 shrink-0 text-neutral-400 transition-transform', isOpen && 'rotate-180')}
+                      aria-hidden
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-4 flex flex-col gap-4 border-t border-neutral-100 pt-4">
+                          <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-8">
+                            <div className="min-w-0 flex-1 space-y-3">
+                              <ProbabilityGauge value={p.prob12mo} />
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs text-neutral-500">Confidence</span>
+                                <Badge variant={confidenceVariant(p.confidence)}>{p.confidence}</Badge>
+                              </div>
+                            </div>
+                            <div className="min-w-0 flex-1 border-t border-neutral-100 pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+                              <p className="mb-2 text-xs font-light uppercase tracking-wide text-neutral-500">Likely requirements</p>
+                              <ul className="space-y-1.5 text-sm text-neutral-700">
+                                {p.requirements.map((r) => (
+                                  <li key={r} className="flex gap-2">
+                                    <span className="mt-1.5 size-1.5 shrink-0 bg-[color:var(--color-accent)]" aria-hidden />
+                                    <span>{r}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="flex shrink-0 flex-wrap gap-2 border-t border-neutral-100 pt-4 lg:flex-col lg:justify-center lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+                              <Button variant="accent" size="sm" className="gap-1" onClick={() => setDrillPredictionId(p.id)}>
+                                View reasoning
+                                <IconArrowRight className="size-3.5" aria-hidden />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.li>
-            ))}
+              )
+            })}
           </ul>
         </div>
       </div>

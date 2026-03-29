@@ -83,27 +83,6 @@ export interface AlertItem {
   effort: Effort
 }
 
-export interface BriefingSection {
-  id: string
-  title: string
-  body: string
-}
-
-export interface BriefingReport {
-  headline: string
-  execSummary: string
-  sections: BriefingSection[]
-  generatedLabel: string
-}
-
-export interface FeedbackEntry {
-  predictionId: number
-  topic: string
-  rating: number
-  comment: string
-  useful: boolean
-}
-
 export const defaultCompany: Company = {
   name: 'DemoHealth AI',
   legal_structure: 'LLC',
@@ -407,37 +386,6 @@ export const mocks = {
     },
   } satisfies Record<number, PredictionDetail>,
 
-  reports: [
-    {
-      headline: 'Health Privacy Wave Incoming',
-      execSummary:
-        'State momentum on health data privacy is accelerating alongside AI transparency expectations for clinical tools. DemoHealth AI should prioritize consent UX, vendor attestations, and model documentation in the next two quarters. Hermes signals align with a 72% 12-month probability on material privacy obligations in core markets.',
-      sections: [
-        {
-          id: 's1',
-          title: "What's Happening",
-          body: 'NY and CA are both moving tighter consent standards for secondary analytics while federal CDS transparency discussions set documentation baselines. Vendor risk is becoming a board-level metric with audit rights expanding in BAAs.',
-        },
-        {
-          id: 's2',
-          title: 'Why You',
-          body: 'Multi-state PHI, AI-assisted workflows, and a growing subprocessor footprint place DemoHealth AI in the crosshairs of overlapping obligations. Peers who moved early reduced incident volume and sped audits.',
-        },
-        {
-          id: 's3',
-          title: 'What To Do',
-          body: 'Sequence consent and lineage work first, parallel vendor attestations, and schedule model card updates for CDS endpoints. Use Hermes alerts as the execution backbone.',
-        },
-        {
-          id: 's4',
-          title: 'Priority Actions',
-          body: '1) Refresh privacy notice and consent flows. 2) Stand up subprocessors registry with notifications. 3) Publish model cards and adverse event logging for CDS. 4) Tier vendors and schedule audits.',
-        },
-      ],
-      generatedLabel: 'Generated Today',
-    },
-  ] satisfies BriefingReport[],
-
   alerts: [
     {
       id: 'a1',
@@ -504,48 +452,4 @@ export const mocks = {
       effort: 'Low',
     },
   ] satisfies AlertItem[],
-
-  feedback: [
-    {
-      predictionId: 1,
-      topic: 'State Health Data Privacy',
-      rating: 5,
-      comment: 'Spot on for CA/NY trajectory.',
-      useful: true,
-    },
-    {
-      predictionId: 2,
-      topic: 'AI Transparency for CDS',
-      rating: 4,
-      comment: 'Needs more on FDA vs state overlap.',
-      useful: true,
-    },
-    {
-      predictionId: 3,
-      topic: 'Cross-Border PHI Transfers',
-      rating: 4,
-      comment: 'Helpful vendor angle.',
-      useful: true,
-    },
-    {
-      predictionId: 4,
-      topic: 'Vendor Risk & BAAs',
-      rating: 5,
-      comment: 'Matched our audit findings.',
-      useful: true,
-    },
-    {
-      predictionId: 5,
-      topic: 'Algorithmic Fairness',
-      rating: 3,
-      comment: 'Directionally right, timing fuzzy.',
-      useful: false,
-    },
-  ] satisfies FeedbackEntry[],
-}
-
-export const feedbackStats = {
-  thumbsUpPercent: 72,
-  thumbsDownPercent: 28,
-  avgRating: 4.2,
 }

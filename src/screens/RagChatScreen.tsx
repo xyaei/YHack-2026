@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { IconListBullets, IconPlug, IconPlus, IconSend, IconWrench } from '@/components/icons'
+import { IconPlus, IconSend, IconWrench } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -31,7 +31,7 @@ export function RagChatScreen() {
     <div className="mx-auto flex min-h-[calc(100dvh-15rem)] w-full max-w-3xl flex-col justify-center px-2 pb-10 md:min-h-[calc(100dvh-11rem)] md:pb-12">
       <div className="flex flex-col gap-8 md:gap-10">
         <div className="text-center">
-          <h1 className="text-3xl font-light tracking-tight text-neutral-800 md:text-4xl">How can I help you today?</h1>
+          <h1 className="text-3xl font-light tracking-tight text-neutral-800 md:text-4xl">Ask a question about your knowledge base.</h1>
         </div>
 
         {messages.length > 0 && (
@@ -70,7 +70,7 @@ export function RagChatScreen() {
             }
           }}
         />
-        <div className="flex flex-wrap items-center gap-2 border-t border-neutral-100 px-3 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-100 px-3 py-3">
           <div className="flex items-center gap-1.5">
             <Button type="button" variant="secondary" size="icon" className="size-9 shrink-0 rounded-xl border-neutral-200 bg-white" aria-label="Add" onClick={() => toast.message('Attachments (demo)')}>
               <IconPlus className="size-4" aria-hidden />
@@ -78,20 +78,6 @@ export function RagChatScreen() {
             <Button type="button" variant="secondary" size="icon" className="size-9 shrink-0 rounded-xl border-neutral-200 bg-white" aria-label="Tools" onClick={() => toast.message('Tools (demo)')}>
               <IconWrench className="size-4" aria-hidden />
             </Button>
-          </div>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            <Button type="button" variant="secondary" size="sm" className="gap-1.5 rounded-xl border-neutral-200 bg-white text-xs font-light text-neutral-700" onClick={() => toast.message('Output format (demo)')}>
-              <IconListBullets className="size-3.5" aria-hidden />
-              Output format
-            </Button>
-            <button
-              type="button"
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-dashed border-neutral-300 bg-[color:var(--color-page)] px-3 text-xs font-light text-neutral-600 transition-colors hover:border-neutral-400 hover:bg-neutral-50"
-              onClick={() => toast.message('Pick a data connector (demo)')}
-            >
-              <IconPlug className="size-3.5 shrink-0 text-neutral-500" aria-hidden />
-              <span className="truncate">Click to select connector</span>
-            </button>
           </div>
           <Button
             type="button"
