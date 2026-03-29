@@ -1,10 +1,9 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Toaster } from 'sonner'
-import { Button } from '@/components/ui/button'
+
 import { cn } from '@/lib/utils'
-import { IconChevronLeft, IconChevronRight, IconMenu, IconRefresh, IconX, LogoGithub } from '@/components/icons'
-import { AlertsNotificationsPanel } from '@/components/AlertsNotificationsPanel'
+import { IconChevronLeft, IconChevronRight, IconMenu, IconX, LogoGithub } from '@/components/icons'
 import { useForseen, type AppView } from '@/store/forseen-context'
 import { Dashboard } from '@/screens/Dashboard'
 import { RagChatScreen } from '@/screens/RagChatScreen'
@@ -75,7 +74,7 @@ const nav: { id: AppView; label: string }[] = [
 ]
 
 export function AppShell() {
-  const { company, activeView, setActiveView, refreshMocks, loading, drillPredictionId, setDrillPredictionId } = useForseen()
+  const { company, activeView, setActiveView, drillPredictionId, setDrillPredictionId } = useForseen()
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
     if (typeof window === 'undefined') return false
@@ -192,28 +191,9 @@ export function AppShell() {
                     </p>
                   </div>
                 </div>
-                <div className="shrink-0 border-l border-neutral-200/80 pl-3 text-left sm:pl-4">
-                  <p className="text-[11px] font-light leading-tight text-neutral-500">Last regulation refresh</p>
-                  <p className="text-sm font-light tabular-nums text-neutral-800">Today</p>
-                </div>
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
-              <AlertsNotificationsPanel />
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-2"
-                disabled={loading}
-                onClick={() => {
-                  refreshMocks()
-                }}
-              >
-                <IconRefresh className={`size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden />
-                Refresh
-              </Button>
-            </div>
           </div>
         </header>
 

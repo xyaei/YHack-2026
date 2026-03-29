@@ -411,7 +411,7 @@ export function SetupScreen() {
             )}
           </div>
 
-          <div className="mt-4 flex shrink-0 flex-col gap-3 border-t border-transparent pt-2 sm:flex-row sm:items-center sm:justify-between md:mt-6">
+          <div className="mt-2 flex shrink-0 flex-col gap-3 border-t border-transparent pt-1 sm:flex-row sm:items-center sm:justify-between md:mt-3">
             <div className="flex gap-2">
               {step > 1 && (
                 <Button type="button" variant="ghost" onClick={() => setStep((s) => s - 1)}>
