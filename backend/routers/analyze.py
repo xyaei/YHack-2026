@@ -24,7 +24,7 @@ class AnalyzeRequest(BaseModel):
     jurisdiction: str
     topic_tags: Optional[List[str]] = None  # derived from topic if omitted
     signal_limit: int = 20
-    max_sub_topics: int = 5
+    max_sub_topics: int = 3
 
 
 class AnalyzeResponse(BaseModel):
