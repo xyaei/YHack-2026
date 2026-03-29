@@ -123,7 +123,7 @@ export function ForseenProvider({ children }: { children: React.ReactNode }) {
   ])
 
   const liveDetail = React.useMemo(
-    () => (lastAnalyze ? apiPredictionToDetail(lastAnalyze.prediction) : undefined),
+    () => (lastAnalyze ? apiPredictionToDetail(lastAnalyze.prediction, lastAnalyze.signals) : undefined),
     [lastAnalyze],
   )
 

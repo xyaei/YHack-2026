@@ -14,7 +14,7 @@ const SIDEBAR_STORAGE_KEY = 'forseen-sidebar-collapsed'
 
 /** Replace with your repo / hackathon submission URLs */
 const EXTERNAL_LINKS = {
-  github: 'https://github.com/',
+  github: 'https://github.com/xyaei/YHack-2026',
   devpost: 'https://devpost.com/',
 } as const
 
